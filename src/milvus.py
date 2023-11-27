@@ -19,12 +19,16 @@ def desensitize_text(self, results, desensitizer):
     return "QAQ"
 
 
-class privDB:
+class privVDB:
 
     def __init__(self, config):
         if config["text_dp_type"] == "santext":
             self.text_dp = desensitization.SanText(
                 config=config["text_dp_config"])
+
+    def get_dp_text(AgentID: str, text, eps):
+        if AgentID == "admin":
+            pass
 
 
 class VDBHandeler:

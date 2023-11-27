@@ -32,7 +32,7 @@ def get_vocab(embedding_type, dataset):
     #     tokenizer_type = "subword"
 
     num_line = sum(1 for _ in open(dataset))
-    num_line /= 3
+    num_line /= 10
     with open(dataset, "r") as f:
         next(f)
         cnt = 0
