@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>转换结果</title>
+</head>
+<body>
+    <h1>输入文本</h1>
+    <form method="POST" action="/">
+        <textarea name="text" rows="10" cols="50">{{ text }}</textarea>
+        <button type="insert" name="insert" value="1">插入</button>
+        <button type="search" name="search" value="2">查询</button>
+    </form>
+    <p>转换后的文本：</p>
+    <p>{{ converted_text }}</p>
+    <p>转换后的数组：</p>
+    <p>{{ converted_array }}</p>
+</body>
+</html>

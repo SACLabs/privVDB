@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>生成列表</title>
+</head>
+<body>
+    <h1>输入文本</h1>
+    <form method="POST" action="/">
+        <textarea name="text" rows="10" cols="50">{{ text }}</textarea>
+        <button type="insert" name="insert" value="1">插入</button>
+        <button type="search" name="search" value="2">查询</button>
+    </form>
+    <h1>生成列表</h1>
+    <p>原文本：</p>
+    <p>{{ text }}</p>
+    <p>生成的列表：</p>
+    <table>
+        <tr>
+            <th>转换后的文本</th>
+            <th>得分</th>
+        </tr>
+        {% for item in list_ %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
