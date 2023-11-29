@@ -3,15 +3,106 @@
 <head>
     <meta charset="utf-8">
     <title>生成列表</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        .custom-btn {
+            width: 100px; /* 设置按钮宽度，根据需要调整 */
+            margin: 5px; /* 设置按钮之间的间距，根据需要调整 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+            color: #fff; /* 设置字体颜色为白色 */
+        }
+        textarea {
+            width: 300px;
+            height: 100px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+            border: none;
+            resize: none; /* 防止用户调整文本区域大小 */
+        }
+    </style>
 </head>
 <body>
-    <h1>输入文本</h1>
-    <form method="POST" action="/">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img src="../static/media/Logo.png" alt="Logo" style="max-width: 150px; height: auto;"></a> <!--or a logo-->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 mx-auto">
+
+            </div>
+            <div class="col-md-8  mx-auto">
+                
+                    <form action="/" method="POST">
+                        <!-- <label for="input">Input a string:</label> -->
+                        <!-- <div style="text-align: center;">
+                            <img src="../static/media/Logo.png" alt="Logo" style="max-width: 300px; height: auto;">
+                        </div> -->
+                        <label for="input"></label>
+                        <!-- <input type="text" id="input" name="input" required> -->
+                        
+                        <div style="text-align:center;vertical-align:middel;">
+                            <textarea class="form-control" placeholder="Add Something" aria-label="With textarea" type="text" id="input" name="text" required>{{ text }}</textarea>
+                        </div>
+                        <br>
+ 
+                        <button type="submit" name="btn" class="btn btn-primary custom-btn" value="1">insert</button>
+                        <button type="submit" name="btn" class="btn btn-info custom-btn" value="2">search</button>
+                         <button style="float:right;" type="submit" name="btn" class="btn btn-danger custom-btn" value="3">Reset DB</button>
+                        
+
+                        
+                    </form>
+                    <br>
+                    <div class="card">
+                        <div class="card-body">
+                          {{text}}
+                        </div>
+                      </div>
+                    <br>
+                    <!--table 后面改下用模板语言就可以了-->
+                    <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">文本</th>
+                            <th scope="col">得分</th>
+
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in list_ %}
+                            <tr>
+                                <th scope="row">{{item[0]}}</th>
+                                <td>{{ item[1] }}</td>
+                                <td>{{ item[2] }}</td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                      </table>
+                    
+                
+            </div>
+            <div class="col-md-2 mx-auto">
+
+            </div>
+        </div>
+    </div>
+
+    <!-- <form method="POST" action="/">
         <textarea name="text" rows="10" cols="50">{{ text }}</textarea>
         <button type="insert" name="insert" value="1">插入</button>
         <button type="search" name="search" value="2">查询</button>
-    </form>
-    <h1>生成列表</h1>
+    </form> -->
+    <!-- <h1>生成列表</h1>
     <p>原文本：</p>
     <p>{{ text }}</p>
     <p>生成的列表：</p>
@@ -26,6 +117,10 @@
             <td>{{ item[1] }}</td>
         </tr>
         {% endfor %}
-    </table>
+    </table> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
 </body>
 </html>
