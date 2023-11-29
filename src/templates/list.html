@@ -40,7 +40,7 @@
             </div>
             <div class="col-md-8  mx-auto">
                 
-                    <form action="/input" method="POST">
+                    <form action="/" method="POST">
                         <!-- <label for="input">Input a string:</label> -->
                         <!-- <div style="text-align: center;">
                             <img src="../static/media/Logo.png" alt="Logo" style="max-width: 300px; height: auto;">
@@ -49,15 +49,14 @@
                         <!-- <input type="text" id="input" name="input" required> -->
                         
                         <div style="text-align:center;vertical-align:middel;">
-                            <textarea class="form-control" placeholder="Add Something" aria-label="With textarea" type="text" id="input" name="text" required>
-                                {{ text }}
-                            </textarea>
+                            <textarea class="form-control" placeholder="Add Something" aria-label="With textarea" type="text" id="input" name="text" required>{{ text }}</textarea>
                         </div>
                         <br>
  
-                        <button type="insert" name="insert" value="1" class="btn btn-primary custom-btn">Submit</button>
-                        <button type="search" name="search" value="2" class="btn btn-info custom-btn">Get</button>
-
+                        <button type="submit" name="btn" class="btn btn-primary custom-btn" value="1">insert</button>
+                        <button type="submit" name="btn" class="btn btn-info custom-btn" value="2">search</button>
+                         <button style="float:right;" type="submit" name="btn" class="btn btn-danger custom-btn" value="3">Reset DB</button>
+                        
 
                         
                     </form>
@@ -73,29 +72,20 @@
                         <thead>
                           <tr>
                             <th scope="col">#</th>
-                            <th scope="col">转换后的文本</th>
+                            <th scope="col">文本</th>
                             <th scope="col">得分</th>
 
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
+                          {% for item in list_ %}
+                            <tr>
+                                <th scope="row">{{item[0]}}</th>
+                                <td>{{ item[1] }}</td>
+                                <td>{{ item[2] }}</td>
+                            </tr>
+                            {% endfor %}
 
-                          </tr>
-                          <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-
-                          </tr>
-                          <tr>
-                            <th scope="row">3</th>
-                            <td colspan="2">Larry the Bird</td>
-
-                          </tr>
                         </tbody>
                       </table>
                     

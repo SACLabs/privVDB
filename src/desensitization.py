@@ -124,30 +124,32 @@ class SanText:
     def __init__(self, config):
 
         self.base_dataset = config["base_dataset_path"]
-        self.embedding_type = config["embedding_type"]
-        self.non_sensitive_p = config["non_sensitive_p"]
-        self.sensitive_word_percentage = config["sensitive_word_percentage"]
+        self.__embedding_type = config["embedding_type"]
+        self.__non_sensitive_p = config["non_sensitive_p"]
+        self.__sensitive_word_percentage = config["sensitive_word_percentage"]
         self.epsilons = sorted(config["epsilons"])
         self.dP_mech = config["DP_mech"]
         self.init()
 
     def init(self):
 
-        vocab = get_vocab(self.embedding_type, self.base_dataset)
-        if self.embedding_type == "glove":
+        vocab = get_vocab(self.__embedding_type, self.base_dataset)
+        if self.__embedding_type == "glove":
             self.tokenizer = English()
             self.tokenizer_type = "word"
         sensitive_word_count = int(
-            math.ceil(self.sensitive_word_percentage * len(vocab)))
+            math.ceil(self.__sensitive_word_percentage * len(vocab)))
         words = [key for key, _ in vocab.most_common()]
         words = list(reversed(words))
+        logging.warning("vocab size:"+str(vocab) +
+                        "\nsensitive word count:"+str(sensitive_word_count))
         self.sensitive_words = set(words[:sensitive_word_count])
 
         self.word2id = {word: k for k, word in enumerate(words)}
         self.id2word = {k: word for k, word in enumerate(words)}
         self.words = set(words)
         word_embeddings = get_embeddings(
-            self.embedding_type, self.word2id, self.id2word)
+            self.__embedding_type, self.word2id, self.id2word)
         self.prob_matrix = {}
         for e in self.epsilons:
             logging.info("Calculating matrix for eps = "+str(e))
@@ -162,7 +164,7 @@ class SanText:
         if eps not in self.prob_matrix.keys():
             raise ValueError("eps not valid")
         pm = self.prob_matrix[eps]
-        if self.embedding_type == "glove":
+        if self.__embedding_type == "glove":
             doc = [token.text for token in self.tokenizer(text)]
             new_doc = []
             for word in doc:
@@ -174,7 +176,7 @@ class SanText:
                 else:
                     logging.info(word + " not in Sensitive_words")
                     flip_p = random.random()
-                    if flip_p > self.non_sensitive_p:
+                    if flip_p > self.__non_sensitive_p:
                         new_doc.append(word)
                     elif word not in self.words:
                         logging.warn(word+" not in vocabulary!")

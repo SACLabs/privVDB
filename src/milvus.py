@@ -9,6 +9,8 @@ import numpy as np
 from flask import Flask, request, jsonify, Blueprint
 import uuid
 import desensitization
+from types import SimpleNamespace
+import llm
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 
@@ -25,10 +27,91 @@ class privVDB:
         if config["text_dp_type"] == "santext":
             self.text_dp = desensitization.SanText(
                 config=config["text_dp_config"])
+        self.vdb = VDBHandeler()
 
-    def get_dp_text(AgentID: str, text, eps):
+    def get_dp_text(self, AgentID: str, text, eps):
         if AgentID == "admin":
-            pass
+            print(1)
+        return self.text_dp.desensitization(text, eps)
+
+    def init_database(self):
+        memory_id = FieldSchema(
+            name="id",
+            dtype=DataType.VARCHAR,
+            max_length=200,
+            is_primary=True,
+        )
+        agent_id = FieldSchema(
+            name="playerId",
+            dtype=DataType.VARCHAR,
+            max_length=200,
+            # The default value will be used if this field is left empty during data inserts or upserts.
+        )
+        embeddings = FieldSchema(
+            name="values",
+            dtype=DataType.FLOAT_VECTOR,
+            dim=1536
+        )
+        private_text = FieldSchema(
+            name="private_text",
+            dtype=DataType.VARCHAR,
+            max_length=2048,
+            description="private_text"
+        )
+
+        schema = CollectionSchema(
+            fields=[memory_id, embeddings, agent_id, private_text],
+            description="test_table",
+            enable_dynamic_field=True
+        )
+        data = {}
+        data["database_name"] = "test_db"
+        data["table_name"] = "test_table"
+        data["schema"] = schema
+        f_n = "values"
+        data["reset"] = True
+        index_params = {
+            "metric_type": "L2",
+            "index_type": "IVF_FLAT",
+            "params": {"nlist": 256}
+        }
+        fake_index = SimpleNamespace()
+        setattr(fake_index, "field_name", f_n)
+        setattr(fake_index, "params", index_params)
+        data["indexes"] = [fake_index]
+        self.vdb.create_table(data)
+
+    def search_text(self, text):
+        embeds = llm.get_embeddings(text)["embeddings"]
+        logging.info(len(embeds))
+        data = {}
+        data["database_name"] = "test_db"
+        data["table_name"] = "test_table"
+
+        data["search_params"] = {
+            "metric_type": "L2",
+            "params": {"nprobe": 4}
+        }
+        data["topK"] = 7
+        data["embedding"] = embeds
+        data["search_field"] = "values"
+        r = self.vdb.query_Data(data)["result"]
+        logging.info(r)
+        res_text = [x.to_dict()["entity"]["private_text"] for x in r[0]]
+        score = [x.to_dict()["distance"] for x in r[0]]
+        return res_text, score
+
+    def insert_text(self, text):
+        embeds = llm.get_embeddings(text)["embeddings"]
+        data = {}
+        data["database_name"] = "test_db"
+        data["table_name"] = "test_table"
+        data_id = str(uuid.uuid4())
+        upsert_data = [[data_id], [embeds], [
+            "agent1"], [text]]
+        data["upsert_data"] = upsert_data
+        self.vdb.upsert_Data(data)
+        return embeds
 
 
 class VDBHandeler:
@@ -134,4 +217,5 @@ class VDBHandeler:
 
 
 if __name__ == "__main__":
-    vdb = VDBHandeler()
+    # vdb = VDBHandeler()
+    pass

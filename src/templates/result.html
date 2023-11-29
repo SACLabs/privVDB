@@ -40,7 +40,7 @@
             </div>
             <div class="col-md-8  mx-auto">
                 
-                    <form action="/input" method="POST">
+                    <form action="/" method="POST">
                         <!-- <label for="input">Input a string:</label> -->
                         <!-- <div style="text-align: center;">
                             <img src="../static/media/Logo.png" alt="Logo" style="max-width: 300px; height: auto;">
@@ -49,14 +49,13 @@
                         <!-- <input type="text" id="input" name="input" required> -->
                         
                         <div style="text-align:center;vertical-align:middel;">
-                            <textarea class="form-control" placeholder="Add Something" aria-label="With textarea" type="text" id="input" name="text" required>
-                                {{ text }}
-                            </textarea>
+                            <textarea class="form-control" placeholder="Add Something" aria-label="With textarea" type="text" id="input" name="text" required>{{ text }}</textarea>
                         </div>
                         <br>
  
-                        <button type="insert" name="insert" value="1" class="btn btn-primary custom-btn">Submit</button>
-                        <button type="search" name="search" value="2" class="btn btn-info custom-btn">Get</button>
+                        <button type="submit" name="btn" class="btn btn-primary custom-btn" value="1">insert</button>
+                        <button type="submit" name="btn" class="btn btn-info custom-btn" value="2">search</button>
+                        <button style="float:right;" type="submit" name="btn" class="btn btn-danger custom-btn" value="3">Reset DB</button>
 
 
                         
@@ -68,7 +67,7 @@
                         </div>
                         <div class="card-body">
 
-                          <p class="card-text">{{ text }}</p>
+                          <p class="card-text">{{ converted_text }}</p>
 
                         </div>
                         <div class="card-footer text-body-secondary">
@@ -85,16 +84,7 @@
         </div>
     </div>
 
-    <!-- <h1>输入文本</h1>
-    <form method="POST" action="/">
-        <textarea name="text" rows="10" cols="50">{{ text }}</textarea>
-        <button type="insert" name="insert" value="1">插入</button>
-        <button type="search" name="search" value="2">查询</button>
-    </form>
-    <p>转换后的文本：</p>
-    <p>{{ converted_text }}</p>
-    <p>转换后的数组：</p>
-    <p>{{ converted_array }}</p> -->
+    
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>

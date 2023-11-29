@@ -1,35 +1,35 @@
 # 导入Flask模块
 from flask import Flask, render_template, request
-
+import milvus
+import numpy as np
 # 创建一个Flask应用
 app = Flask(__name__)
 
 # 定义一个转换函数，根据你的需求实现转换逻辑
 
 
-def convert(text):
-    # 这里是示例代码，你可以根据你的需求修改
-    # 转换后的文本是原文本的倒序
-    converted_text = text[::-1]
-    # 转换后的数组是原文本中每个字符的ASCII码
-    converted_array = [ord(c) for c in text]
-    # 返回转换后的文本和数组
-    return converted_text, converted_array
+def insert_dp_text_and_embeddings(text):
+    try:
+        dp_text = privDB.get_dp_text("admin", text, 3)
+        embeds = privDB.insert_text(dp_text)
+        embeds = str(np.array(embeds))
+    except Exception as e:
+        dp_text = "ERROR"
+        embeds = str(e)
+
+    return dp_text, embeds
 
 # 定义一个路由，用来处理网页的请求
 
 # 定义一个生成列表的函数，根据你的需求实现生成逻辑
 
 
-def generate_list(text):
-    # 这里是示例代码，你可以根据你的需求修改
-    # 生成的列表是原文本按空格分割后的子串，每个子串的得分是它的长度
-    lis = []
-    for word in text.split():
-        lis.append((word, len(word)))
-    import time
-    time.sleep(3)
-    # 返回生成的列表
+def get_search_result(text):
+    try:
+        lis = privDB.search_text(text)
+        lis = [(i, x[0], x[1]) for i, x in enumerate(zip(lis[0], lis[1]))]
+    except Exception as e:
+        lis = [(str(e), 0)]
     return lis
 
 # 定义一个新的路由，用来处理生成列表的请求
@@ -44,19 +44,37 @@ def index():
     elif request.method == 'POST':
         import logging
         logging.warning(request.form.to_dict())
-        logging.warning(request.form.get('insert'))
-        button = request.form.get('insert') or request.form.get('search')
+        button = request.form.get('btn')
         logging.warning(button)
         if button == "1":
             text = request.form.get('text')
-            converted_text, converted_array = convert(text)
+            converted_text, converted_array = insert_dp_text_and_embeddings(
+                text)
+            logging.info(converted_text)
             return render_template('result.html', text=text, converted_text=converted_text, converted_array=converted_array)
-        else:
+        elif button == "2":
             text = request.form.get('text')
-            list_ = generate_list(text)
+            list_ = get_search_result(text)
             return render_template('list.html', text=text, list_=list_)
+        elif button == "3":
+            privDB.init_database()
+            return render_template('form.html')
+        else:
+            logging.info(button)
 
 
 # 运行Flask应用
 if __name__ == '__main__':
+    config = {}
+    dp_config = {
+        "base_dataset_path": """D:\Codes\pjlab\\vdb\privVDB\\v0.1\privDB\data\CBTest\data\cbt_train.txt""",
+        "embedding_type": "glove",
+        "non_sensitive_p": 0.3,
+        "sensitive_word_percentage": 0.9,
+        "epsilons": [1, 3],
+        "DP_mech": "base"
+    }
+    config["text_dp_type"] = "santext"
+    config["text_dp_config"] = dp_config
+    privDB = milvus.privVDB(config)
     app.run(debug=True)
