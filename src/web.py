@@ -2,6 +2,8 @@
 from flask import Flask, render_template, request
 import milvus
 import numpy as np
+import argparse
+
 # 创建一个Flask应用
 app = Flask(__name__)
 
@@ -63,18 +65,54 @@ def index():
             logging.info(button)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Description of your program.")
+
+    parser.add_argument("--base_dataset_path", type=str,
+                        help="Path to cbt_train.txt")
+
+    parser.add_argument("--embedding_type", type=str, default="glove",
+                        help="Type of embedding.")
+
+    parser.add_argument("--non_sensitive_p", type=float, default=0.3,
+                        help="Non-sensitive parameter.")
+
+    parser.add_argument("--sensitive_word_percentage", type=float, default=0.9,
+                        help="Percentage of sensitive words.")
+
+    parser.add_argument("--epsilons", type=int, nargs="+", default=[1, 3],
+                        help="List of epsilon values.")
+
+    parser.add_argument("--dp_mech", type=str, default="base",
+                        help="Differential Privacy mechanism.")
+
+    parser.add_argument("--embedding_path", type=str,
+                        help="Path to glove.840B.300d.txt.")
+
+    parser.add_argument("--text_dp_type", type=str, default="santext",
+                        help="Type of text differential privacy.")
+
+    return parser.parse_args()
+
+
 # 运行Flask应用
 if __name__ == '__main__':
+    args = parse_args()
     config = {}
     dp_config = {
-        "base_dataset_path": """D:\Codes\pjlab\\vdb\privVDB\\v0.1\privDB\data\CBTest\data\cbt_train.txt""",
-        "embedding_type": "glove",
-        "non_sensitive_p": 0.3,
-        "sensitive_word_percentage": 0.9,
-        "epsilons": [1, 3],
-        "DP_mech": "base"
+        "base_dataset_path": args.base_dataset_path,
+        "embedding_type": args.embedding_type,
+        "embedding_path": args.embedding_path,
+        "non_sensitive_p": args.non_sensitive_p,
+        "sensitive_word_percentage": args.sensitive_word_percentage,
+        "epsilons": args.epsilons,
+        "DP_mech": args.dp_mech,
+        "args": args
     }
-    config["text_dp_type"] = "santext"
+    config["text_dp_type"] = args.text_dp_type
     config["text_dp_config"] = dp_config
-    privDB = milvus.privVDB(config)
-    app.run(debug=True)
+    privDB = milvus.PrivVDB(config)
+    # privDB = "1"
+    print("start")
+    app.run(debug=False, port=6001)
