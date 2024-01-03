@@ -2,17 +2,6 @@ import os
 from dotenv import load_dotenv
 import numpy as np
 
-import requests
-requests.packages.urllib3.disable_warnings()
-requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
-try:
-    requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
-except AttributeError:
-    # no pyopenssl support used / needed / available
-    pass
-requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
-requests.packages.urllib3.disable_warnings()
-
 if True:
     import openai
 
@@ -52,7 +41,8 @@ def get_embeddings(text, embedding_type="openai"):
 
 
 if __name__ == "__main__":
-    get_embeddings("QAQ!!")
+    # get_embeddings("QAQ!!")
+    pass
     # response = openai.Embedding.create(
     #     model="text-embedding-ada-002", input=text)
     # # 从响应中提取textembedding，它是一个浮点数列表

@@ -10,11 +10,7 @@ import logging
 import random
 import unicodedata
 import pickle
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(process)d \n\t %(" "message)s",
-    filename="log/trade2.log",
-)
+import argparse
 
 
 def word_normalize(text):
@@ -50,16 +46,16 @@ def get_vocab(embedding_type, dataset):
     return vocab
 
 
-def get_embeddings(embedding_type, word2id, id2word):
+def get_embeddings(embedding_type, word2id, id2word, args):
     embeddings = {}
     if embedding_type == "glove":
-        word_embedding_path = r"D:\Codes\pjlab\vdb\dpnlp\SanText\data\glove.840B.300d.txt"
-        num_lines = sum(1 for _ in open(
-            word_embedding_path, encoding='utf-8'))
-        logging.info("Loading Word Embedding File: %s" %
-                     word_embedding_path)
 
-        with open(word_embedding_path, encoding='utf-8') as f:
+        num_lines = sum(1 for _ in open(
+            args.embedding_path, encoding='utf-8'))
+        logging.info("Loading Word Embedding File: %s" %
+                     args.embedding_path)
+
+        with open(args.embedding_path, encoding='utf-8') as f:
             # Skip first line if of form count/dim.
             line = f.readline().rstrip().split(' ')
             if len(line) != 2:
@@ -109,7 +105,7 @@ def get_prob_matrix_2(embed_A, embed_B, eps):
 
     b = np.ones(m)
     x = np.linalg.solve(prob_matrix, b)
-    pickle.dump({"A": prob_matrix, "x": x}, open("log/Ax.pkl", "wb+"))
+    # pickle.dump({"A": prob_matrix, "x": x}, open("log/Ax.pkl", "wb+"))
     logging.info(list(np.where(x < 0)))
     full_matrix = euclidean_distances(embed_A, embed_B)
     full_matrix = np.exp(-full_matrix*eps, dtype=np.longdouble)*x
@@ -129,6 +125,7 @@ class SanText:
         self.__sensitive_word_percentage = config["sensitive_word_percentage"]
         self.epsilons = sorted(config["epsilons"])
         self.dP_mech = config["DP_mech"]
+        self.args = config["args"]
         self.init()
 
     def init(self):
@@ -149,13 +146,13 @@ class SanText:
         self.id2word = {k: word for k, word in enumerate(words)}
         self.words = set(words)
         word_embeddings = get_embeddings(
-            self.__embedding_type, self.word2id, self.id2word)
+            self.__embedding_type, self.word2id, self.id2word, self.args)
         self.prob_matrix = {}
         for e in self.epsilons:
             logging.info("Calculating matrix for eps = "+str(e))
             if self.dP_mech == "base":
                 self.prob_matrix[e] = get_prob_matrix(
-                    word_embeddings, word_embeddings[:sensitive_word_count], e)
+                    np.array(word_embeddings, dtype=np.float64), np.array(word_embeddings[:sensitive_word_count], dtype=np.float64), e)
             elif self.dP_mech == "adv":
                 self.prob_matrix[e] = get_prob_matrix_2(
                     word_embeddings, word_embeddings[:sensitive_word_count], e)
@@ -189,18 +186,63 @@ class SanText:
         return " ".join(new_doc)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Description of your program.")
+
+    parser.add_argument("--base_dataset_path", type=str,
+                        help="Path to cbt_train.txt")
+
+    parser.add_argument("--embedding_type", type=str, default="glove",
+                        help="Type of embedding.")
+
+    parser.add_argument("--non_sensitive_p", type=float, default=0.3,
+                        help="Non-sensitive parameter.")
+
+    parser.add_argument("--sensitive_word_percentage", type=float, default=0.9,
+                        help="Percentage of sensitive words.")
+
+    parser.add_argument("--epsilons", type=int, nargs="+", default=[1, 3],
+                        help="List of epsilon values.")
+
+    parser.add_argument("--dp_mech", type=str, default="base",
+                        help="Differential Privacy mechanism.")
+
+    parser.add_argument("--embedding_path", type=str,
+                        help="Path to glove.840B.300d.txt.")
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(process)d \n\t %(" "message)s",
+        filename="log/trade2.log",
+    )
+    args = parse_args()
     config = {
-        "base_dataset_path": """D:\Codes\pjlab\\vdb\privVDB\\v0.1\privDB\data\CBTest\data\cbt_train.txt""",
-        "embedding_type": "glove",
-        "non_sensitive_p": 0.2,
-        "sensitive_word_percentage": 0.95,
-        "epsilons": [1],
-        "DP_mech": "adv"
+        "base_dataset_path": args.base_dataset_path,
+        "embedding_type": args.embedding_type,
+        "embedding_path": args.embedding_path,
+        "non_sensitive_p": args.non_sensitive_p,
+        "sensitive_word_percentage": args.sensitive_word_percentage,
+        "epsilons": args.epsilons,
+        "DP_mech": args.dp_mech,
+        "args": args
     }
     my_santext = SanText(config=config)
-    o = "Assistants API and tools (retrieval, code interpreter) make it easy for developers to build AI assistants within their own applications. Each assistant incurs its own retrieval file storage fee based on the files passed to that assistant. The retrieval tool chunks and indexes your files content in our vector database."
-    t = my_santext.desensitization(o, eps=config["epsilons"][0])
+    # o = "Assistants API and tools (retrieval, code interpreter) make it easy for developers to build AI assistants within their own applications. Each assistant incurs its own retrieval file storage fee based on the files passed to that assistant. The retrieval tool chunks and indexes your files content in our vector database."
     save_path = "log/res.txt"
+    o = "i'm looking for a flight from charlotte to las vegas that stops in st. louis hopefully a dinner flight how can i find that out"
+    t = my_santext.desensitization(o, eps=config["epsilons"][0])
     print(t)
-    open(save_path, "a+").write(str(config)+":\n"+o+'\n'+t+'\n')
+    o = "book a spot at a taverna for my cousin and i in burundi"
+    t = my_santext.desensitization(o, eps=config["epsilons"][0])
+    print(t)
+    o = "I bought this for my husband who plays the piano.  He is having a wonderful time playing these old hymns.  The music  is at times hard to read because we think the book was published for singing from more than playing from.  Great purchase though!"
+    t = my_santext.desensitization(o, eps=config["epsilons"][0])
+    print(t)
+    o = "Eric Steven Raymond (born December 4, 1957), often referred to as ESR, is an American software developer, open-source software advocate, and author of the 1997 essay and 1999 book The Cathedral and the Bazaar. He wrote a guidebook for the Roguelike game NetHack"
+    t = my_santext.desensitization(o, eps=config["epsilons"][0])
+    print(t)

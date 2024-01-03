@@ -1,18 +1,12 @@
 import llm
-import pymilvus
 from pymilvus import CollectionSchema, FieldSchema, DataType, connections, db, utility, Collection
-import argparse
-import requests
 import json
 import logging
 import numpy as np
-from flask import Flask, request, jsonify, Blueprint
 import uuid
 import desensitization
 from types import SimpleNamespace
-import llm
-logging.basicConfig(level=logging.INFO)
-app = Flask(__name__)
+# logging.basicConfig(level=logging.INFO)
 
 
 def desensitize_text(self, results, desensitizer):
@@ -21,13 +15,13 @@ def desensitize_text(self, results, desensitizer):
     return "QAQ"
 
 
-class privVDB:
+class PrivVDB:
 
     def __init__(self, config):
         if config["text_dp_type"] == "santext":
             self.text_dp = desensitization.SanText(
                 config=config["text_dp_config"])
-        self.vdb = VDBHandeler()
+        self.vdb = VDBHandler()
 
     def get_dp_text(self, AgentID: str, text, eps):
         if AgentID == "admin":
@@ -114,7 +108,7 @@ class privVDB:
         return embeds
 
 
-class VDBHandeler:
+class VDBHandler:
 
     def __init__(self, host="localhost", port=19530):
         connections.connect(host="localhost", port=19530)
